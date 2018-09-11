@@ -28,16 +28,16 @@ sending mail
 class MailSender(object):
 
     def _to(self, message):
-        return message['to']
+        return message.get('to', list())
 
     def _cc(self, message):
-        return message['cc']
+        return message.get('cc', list())
 
     def _subject(self, message):
-        return message['subject']
+        return message.get('subject', '')
 
     def _body(self, message):
-        return message['body']
+        return message.get('body', '')
 
     def send_mail(self, message):
         raise NotImplementedError()
