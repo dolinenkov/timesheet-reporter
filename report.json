@@ -1,0 +1,32 @@
+{
+  "worklog_collectors": {
+    "jira": {
+      "url": "https://jira.mycompany.com",
+      "login": "jdoe@mycompany.com"
+    }
+  },
+
+  "mail_senders": {
+    "outlook": {
+    }
+  },
+
+  "message": {
+    "to": [
+      "test1@mycompany.com"
+    ],
+    "cc": [
+      "test2@mycompany.com",
+      "test3@mycompany.com"
+    ],
+    "subject": "[{department}][{project}] Daily Report {date}",
+    "body": "{header}\n\n{timesheet}\n\n{footer}"
+  },
+
+  "args": {
+    "department": "LA",
+    "project": "1",
+    "header": "Hello",
+    "footer": "John Doe\nCleaning Manager\n________________________________________\nMyCompany\n"
+  }
+}
