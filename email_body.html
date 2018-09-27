@@ -1,0 +1,120 @@
+<html>
+<body style='tab-interval:35.4pt'>
+
+<div>
+
+<p><span><!-- TODO --></span></p>
+
+<div align=center>
+<table border=1 cellpadding=0 width=0 style='width:375.0pt;'>
+  <tr>
+    <td style='padding:3.75pt 3.75pt 3.75pt 3.75pt'></td>
+    <td style='padding:3.75pt 3.75pt 3.75pt 3.75pt'></td>
+    <td style='padding:3.75pt 3.75pt 3.75pt 3.75pt'>
+      <p style='margin:0cm;margin-bottom:.0001pt;-qt-block-indent:0'>{{date.strftime('%a')[:1]}}</p>
+    </td>
+    <td style='padding:3.75pt 3.75pt 3.75pt 3.75pt'></td>
+    <td style='padding:3.75pt 3.75pt 3.75pt 3.75pt'></td>
+  </tr>
+
+  <tr>
+    <td style='padding:3.75pt 3.75pt 3.75pt 3.75pt'><p style='margin:0cm;margin-bottom:.0001pt;-qt-block-indent:0'><b>Project</b></p></td>
+    <td style='padding:3.75pt 3.75pt 3.75pt 3.75pt'><p style='margin:0cm;margin-bottom:.0001pt;-qt-block-indent:0'><b>Issue</b></p></td>
+    <td style='background:lightgrey;padding:3.75pt 3.75pt 3.75pt 3.75pt'><p style='margin:0cm;margin-bottom:.0001pt;-qt-block-indent:0'><span
+      style='background:lightgrey'>{{date.strftime('%m')}}</span></p></td>
+    <td style='padding:3.75pt 3.75pt 3.75pt 3.75pt'><p style='margin:0cm;margin-bottom:.0001pt;-qt-block-indent:0'><b>Total</b></p></td>
+    <td style='padding:3.75pt 3.75pt 3.75pt 3.75pt'><p style='margin:0cm;margin-bottom:.0001pt;-qt-block-indent:0'><b>Issue</b></p></td>
+  </tr>
+
+{% for project in projects %}
+
+  <tr>
+    <td rowspan={{project.issues|length + 3}} style='padding:3.75pt 3.75pt 3.75pt 3.75pt'>
+      <p align=center style='margin:0cm;margin-bottom:.0001pt;text-align:center;-qt-block-indent:0'><b>{{project.name}}</b></p>
+    </td>
+
+{% for issue in project.issues %}
+
+  </tr>
+  <tr>
+    <td style='padding:3.75pt 3.75pt 3.75pt 3.75pt'>
+      <p style='margin:0cm;margin-bottom:.0001pt;-qt-block-indent:0'><a href="{{issue.url|escape}}">{{issue.summary}}</a></p>
+    </td>
+    <td style='padding:3.75pt 3.75pt 3.75pt 3.75pt'>
+      <p style='margin:0cm;margin-bottom:.0001pt;-qt-block-indent:0'>{{'{:.2f}'.format(issue.time.today)}}</p>
+    </td>
+    <td style='padding:3.75pt 3.75pt 3.75pt 3.75pt'>
+      <p style='margin:0cm;margin-bottom:.0001pt;-qt-block-indent:0'>{{'{:.2f}'.format(issue.time.total)}}</p>
+    </td>
+    <td style='padding:3.75pt 3.75pt 3.75pt 3.75pt'>
+      <p style='margin:0cm;margin-bottom:.0001pt;-qt-block-indent:0'><a href="{{issue.url|escape}}">{{issue.summary}}</a></p>
+    </td>
+
+{% endfor %}
+
+  </tr>
+
+  <tr>
+    <td style='padding:3.75pt 3.75pt 3.75pt 3.75pt'></td>
+    <td style='padding:3.75pt 3.75pt 3.75pt 3.75pt'></td>
+    <td style='padding:3.75pt 3.75pt 3.75pt 3.75pt'></td>
+    <td style='padding:3.75pt 3.75pt 3.75pt 3.75pt'></td>
+  </tr>
+
+  <tr>
+    <td style='padding:3.75pt 3.75pt 3.75pt 3.75pt'>
+      <p style='margin:0cm;margin-bottom:.0001pt;-qt-block-indent:0'>Total</p>
+    </td>
+    <td style='padding:3.75pt 3.75pt 3.75pt 3.75pt'>
+      <p style='margin:0cm;margin-bottom:.0001pt;-qt-block-indent:0'>{{'{:.2f}'.format(project.time.today)}}</p>
+    </td>
+    <td style='padding:3.75pt 3.75pt 3.75pt 3.75pt'>
+      <p style='margin:0cm;margin-bottom:.0001pt;-qt-block-indent:0'>{{'{:.2f}'.format(project.time.total)}}</p>
+    </td>
+    <td style='padding:3.75pt 3.75pt 3.75pt 3.75pt'>
+      <p style='margin:0cm;margin-bottom:.0001pt;-qt-block-indent:0'><b>{{project.name}}</b></p>
+    </td>
+  </tr>
+
+  <tr>
+    <td style='padding:3.75pt 3.75pt 3.75pt 3.75pt'></td>
+    <td style='padding:3.75pt 3.75pt 3.75pt 3.75pt'></td>
+    <td style='padding:3.75pt 3.75pt 3.75pt 3.75pt'></td>
+    <td style='padding:3.75pt 3.75pt 3.75pt 3.75pt'></td>
+  </tr>
+
+{% endfor %}
+
+  <tr>
+    <td style='padding:3.75pt 3.75pt 3.75pt 3.75pt'></td>
+    <td style='padding:3.75pt 3.75pt 3.75pt 3.75pt'></td>
+    <td style='padding:3.75pt 3.75pt 3.75pt 3.75pt'></td>
+    <td style='padding:3.75pt 3.75pt 3.75pt 3.75pt'></td>
+    <td style='padding:3.75pt 3.75pt 3.75pt 3.75pt'></td>
+  </tr>
+
+  <tr>
+    <td style='padding:3.75pt 3.75pt 3.75pt 3.75pt'>
+      <p style='margin:0cm;margin-bottom:.0001pt;-qt-block-indent:0'><b>Total</b></p>
+    </td>
+    <td style='padding:3.75pt 3.75pt 3.75pt 3.75pt'></td>
+    <td style='padding:3.75pt 3.75pt 3.75pt 3.75pt'>
+      <p style='margin:0cm;margin-bottom:.0001pt;-qt-block-indent:0'>{{'{:.2f}'.format(time.today)}}</p>
+    </td>
+    <td style='padding:3.75pt 3.75pt 3.75pt 3.75pt'>
+      <p style='margin:0cm;margin-bottom:.0001pt;-qt-block-indent:0'>{{'{:.2f}'.format(time.total)}}</p>
+    </td>
+    <td style='padding:3.75pt 3.75pt 3.75pt 3.75pt'></td>
+  </tr>
+
+</table>
+</div>
+
+<p>&nbsp;</p>
+
+<p><span><!-- TODO --></span></p>
+
+</div>
+
+</body>
+</html>

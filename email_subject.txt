@@ -1,0 +1,1 @@
+[{{department}}]{% for project in projects %}[{{project.name}}]{% endfor %} Daily Report {{'{:%d.%m.%Y}'.format(date)}}

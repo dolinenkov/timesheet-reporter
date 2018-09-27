@@ -5,7 +5,7 @@
 
 daily report sending script
 
-pip dependencies  : pywin32, jira
+pip dependencies  : pywin32, jira, jinja2
 software needed   : outlook 2013
 
 reference:
@@ -14,56 +14,131 @@ https://jira.readthedocs.io/en/master/examples.html
 
 """
 
-
+import jira
+import datetime
 import json
-from datetime import *
-from getpass import getpass
-from win32com.client import Dispatch
+import win32com.client
+import jinja2
 
 
-class ReportGenerator:
+class Reporter:
+    _OPTIONS = u'.report.json'
 
-  def __init__(self, password):
-    with open('report-config.json', 'rb') as f:
-      options = json.load(f)
-      self._office = options['office'] # TODO remove: deparment
-      self._project = options['project']
-      self._to = ';'.join(t for t in options['to'])
-      self._cc = ';'.join(t for t in options['cc'])
-      self._header = options['header']
-      self._footer = options['footer']
-      self._login = options['login']
-      self._jira = options['jira']
-    self._password = password
+    _JIRA_QUERY = 'worklogAuthor=currentUser() and worklogDate>=startOfDay(-0d) and worklogDate<=endOfDay(-0d)'
 
-  def _timesheet(self):
-    return '\n{}\n'.format('')
+    @staticmethod
+    def _read_config():
+        with open(Reporter._OPTIONS, 'rb') as file:
+            return json.load(file)
 
-  def _subject(self):
-    return '[{}][{}] Daily Report {}'.format(self._office, self._project, datetime.now().strftime('%d.%m.%Y'))
+    @staticmethod
+    def _work_log_duration(work_logs, author, date):
+        def get_date(w):
+            return datetime.datetime.strptime(w.started.split(u'T', 1)[0], u'%Y-%m-%d').date()
+        return sum(w.timeSpentSeconds / 3600.0 for w in work_logs if w.author.key == author and get_date(w) == date)
 
-  def _body(self):
-    return self._header + self._timesheet() + self._footer
+    @staticmethod
+    def _work_log_for_issue(work_logs, author, date):
+        duration = Reporter._work_log_duration(work_logs, author, date)
+        return {
+            'today': duration,
+            'total': duration
+        }
 
-  def _create_report(self):
-    outlook = Dispatch("Outlook.Application")
-    email = outlook.CreateItem(0x0) #olMailItem = 0x0
-    email.To = self._to
-    email.CC = self._cc
-    email.Subject = self._subject()
-    email.Body = self._body()
-    print self._body()
-    #email.BodyFormat = 2 # olFormatHTML, 3 = olFormatRichText
-    #email.HTMLBody = ''
-    return email
+    @staticmethod
+    def _work_log_for_project(project):
+        return {
+            'today': sum(issue['time']['today'] for issue in project['issues']),
+            'total': sum(issue['time']['total'] for issue in project['issues'])
+        }
 
-  def open_report(self):
-    self._create_report().Display(False)
+    @staticmethod
+    def _work_log_for_all_projects(projects):
+        return {
+            'today': sum(project['time']['today'] for project in projects),
+            'total': sum(project['time']['total'] for project in projects)
+        }
 
-  def send_report(self):
-    print 'Function disabled'
-    #self._create_report().Send()
+    @staticmethod
+    def _get_timesheet(config, date):
+        j = jira.JIRA(config['jira_url'], basic_auth=(config['jira_login'], config['jira_password']))
+
+        projects = []
+        for i in j.search_issues(Reporter._JIRA_QUERY):
+
+            filtered_projets = filter(lambda p: p['name'] == i.fields.project.key, projects)
+            if len(filtered_projets) > 0:
+                project = filtered_projets[0]
+            else:
+                project = {
+                    'name': i.fields.project.key,
+                    'url': '',
+                    'issues': []
+                }
+                projects.append(project)
+
+            project['issues'].append({
+                'summary': u'{} - {}'.format(i.key, i.fields.summary),
+                'url': '',
+                'time': Reporter._work_log_for_issue(j.worklogs(i.key), config['jira_login'], date)
+            })
+
+        for project in projects:
+            project['time'] = Reporter._work_log_for_project(project)
+
+        return {
+            'date': date,
+            'time': Reporter._work_log_for_all_projects(projects),
+            'projects': projects,
+        }
+
+    def _generate_subject(self, options):
+        return self._jenv.get_template('email_subject.txt').render(options)
+
+    def _generate_body(self, options):
+        return self._jenv.get_template('email_body.html').render(options)
+
+    def _create_mail(self, date):
+
+        class OlItemType:
+            olMailItem = 0
+
+            def __init__(self):
+                pass
+
+        class OlMailRecipientType:
+            olCC = 2
+            olTo = 1
+
+            def __init__(self):
+                pass
+
+        o = win32com.client.Dispatch('Outlook.Application')
+        m = o.CreateItem(OlItemType.olMailItem)
+
+        t = {}
+        t.update(self._config)
+        t.update(Reporter._get_timesheet(self._config, date))
+
+        m.Subject = self._generate_subject(t)
+        m.HTMLBody = self._generate_body(t)
+        for r in self._config['mail_to']:
+            m.Recipients.Add(r).Type = OlMailRecipientType.olTo
+        for r in self._config['mail_cc']:
+            m.Recipients.Add(r).Type = OlMailRecipientType.olCC
+        m.Recipients.ResolveAll()
+        return m
+
+    def __init__(self):
+        self._config = Reporter._read_config()
+        self._jenv = jinja2.Environment(loader=jinja2.FileSystemLoader(searchpath='./'))
+
+    def _create_report(self):
+        return self._create_mail(datetime.date.today())
+
+    def display(self):
+        self._create_report().Display(False)
 
 
 if __name__ == '__main__':
-  ReportGenerator(getpass('Please enter your JIRA password:')).open_report()
+    Reporter().display()
