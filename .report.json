@@ -1,7 +1,6 @@
 {
   "jira_url": "http://jira.jjcompany.com",
   "jira_login": "jdoe",
-  "jira_password": "pizza",
   "mail_to": [
     "John Doe"
   ],

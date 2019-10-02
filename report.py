@@ -5,20 +5,23 @@
 
 daily report sending script
 
-pip dependencies  : pywin32, jira, jinja2
+pip dependencies  : pywin32, jira, jinja2, keyring
 software needed   : outlook 2013
 
 reference:
 https://msdn.microsoft.com/en-us/library/office/aa219371(v=office.11).aspx
 https://jira.readthedocs.io/en/master/examples.html
+https://pypi.org/project/keyring
 
 """
 
 import jira
 import datetime
 import json
+import getpass
 import win32com.client
 import jinja2
+import keyring
 
 
 class Reporter:
@@ -30,6 +33,15 @@ class Reporter:
     def _read_config():
         with open(Reporter._OPTIONS, 'rb') as file:
             return json.load(file)
+
+    @staticmethod
+    def _get_and_save_password(jira_url, jira_login):
+        passwd = keyring.get_password(jira_url, jira_login)
+        if not passwd:
+          passwd = getpass.getpass('Password for {} @{} :>'.format(jira_url, jira_login))
+          if passwd:
+            keyring.set_password(jira_url, jira_login, passwd)
+        return passwd
 
     @staticmethod
     def _work_log_duration(work_logs, author, date):
@@ -61,7 +73,10 @@ class Reporter:
 
     @staticmethod
     def _get_timesheet(config, date):
-        j = jira.JIRA(config['jira_url'], basic_auth=(config['jira_login'], config['jira_password']))
+        jira_url = config['jira_url']
+        jira_login = config['jira_login']
+        jira_password = Reporter._get_and_save_password(jira_url, jira_login)
+        j = jira.JIRA(jira_url, basic_auth=(jira_login, jira_password))
 
         projects = []
         for i in j.search_issues(Reporter._JIRA_QUERY):
