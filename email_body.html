@@ -1,4 +1,9 @@
 <html>
+
+<head>
+<title>[{{department}}]{% for project in projects %}[{{project.name}}]{% endfor %} Daily Report {{'{:%d.%m.%Y}'.format(date)}}</title>
+</head>
+
 <body style='tab-interval:35.4pt'>
 
 <div>
@@ -29,7 +34,7 @@
 {% for project in projects %}
 
   <tr>
-    <td rowspan={{project.issues|length + 3}} style='padding:3.75pt 3.75pt 3.75pt 3.75pt'>
+    <td rowspan={{project.issues|length + 4}} style='padding:3.75pt 3.75pt 3.75pt 3.75pt'>
       <p align=center style='margin:0cm;margin-bottom:.0001pt;text-align:center;-qt-block-indent:0'><b>{{project.name}}</b></p>
     </td>
 
